@@ -33,13 +33,37 @@ export default function List({
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<SortOption>("distance");
   const windowHeight = Dimensions.get("window").height;
-  const defaultHeight = windowHeight * 0.3;
+  const defaultHeight = windowHeight * 0.5; // Changed to middle position
   const [containerHeight, setContainerHeight] = useState(defaultHeight);
   const minHeight = windowHeight * 0.2;
-  const maxHeight = windowHeight * 0.93;
+  const maxHeight = windowHeight * 0.8; // Changed to 0.8 instead of 0.93
 
   // Create an animated value for tracking drag
   const dragY = useRef(new Animated.Value(0)).current;
+
+  const snapToHeight = (currentHeight: number) => {
+    const snapPoints = [
+      windowHeight * 0.2,
+      windowHeight * 0.5,
+      windowHeight * 0.8,
+    ];
+
+    // Find closest snap point
+    const closest = snapPoints.reduce((prev, curr) => {
+      return Math.abs(curr - currentHeight) < Math.abs(prev - currentHeight)
+        ? curr
+        : prev;
+    });
+
+    // Animate to snap point
+    Animated.spring(dragY, {
+      toValue: defaultHeight - closest,
+      useNativeDriver: false,
+      bounciness: 8,
+    }).start();
+
+    setContainerHeight(closest);
+  };
 
   const panResponder = useRef(
     PanResponder.create({
@@ -53,11 +77,8 @@ export default function List({
       }),
       onPanResponderRelease: () => {
         dragY.flattenOffset();
-        // Calculate and set the final height
         const newHeight = defaultHeight - (dragY as any)._value;
-        if (newHeight >= minHeight && newHeight <= maxHeight) {
-          setContainerHeight(newHeight);
-        }
+        snapToHeight(newHeight);
       },
     })
   ).current;
