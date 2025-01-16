@@ -12,23 +12,28 @@ import {
 import React, { useRef, useState } from "react";
 import { NationalPark } from "../types/national_park";
 import { Region } from "react-native-maps";
+import ListPark from "./ListPark";
+import { ListItem } from "../types/list_item";
 
-type SortOption = "distance" | "name" | "visitors";
+type SortOption = "distance" | "name" | "visitors" | "review_average";
 
 export default function List({
   parks,
   setSelectedPark,
   currentRegion,
+  user_list,
+  fetchListItems,
 }: {
   parks: NationalPark[];
   setSelectedPark: (park: NationalPark) => void;
   currentRegion: Region;
+  user_list: ListItem[];
+  fetchListItems: () => void;
 }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<SortOption>("distance");
-  const [stateFilter, setStateFilter] = useState<string>("");
   const windowHeight = Dimensions.get("window").height;
-  const defaultHeight = windowHeight * 0.5;
+  const defaultHeight = windowHeight * 0.3;
   const [containerHeight, setContainerHeight] = useState(defaultHeight);
   const minHeight = windowHeight * 0.2;
   const maxHeight = windowHeight * 0.93;
@@ -78,6 +83,8 @@ export default function List({
         return [...parks].sort((a, b) => a.name.localeCompare(b.name));
       case "visitors":
         return [...parks].sort((a, b) => b.yearly_visitors - a.yearly_visitors);
+      case "review_average":
+        return [...parks].sort((a, b) => b.review_average - a.review_average);
       case "distance":
       default:
         return [...parks].sort(
@@ -88,12 +95,13 @@ export default function List({
 
   const filterParks = (parks: NationalPark[]) => {
     return parks.filter((park) => {
-      const matchesSearch = park.name
-        .toLowerCase()
-        .includes(searchQuery.toLowerCase());
-      const matchesState =
-        !stateFilter || park.state.toLowerCase() === stateFilter.toLowerCase();
-      return matchesSearch && matchesState;
+      const searchLower = searchQuery.toLowerCase();
+      return (
+        park.name.toLowerCase().includes(searchLower) ||
+        park.state.toLowerCase().includes(searchLower) ||
+        park.established.toLowerCase().includes(searchLower) ||
+        park.review_average.toString().includes(searchLower)
+      );
     });
   };
 
@@ -110,18 +118,12 @@ export default function List({
         <View style={styles.handle} />
       </View>
       <View style={styles.controls}>
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search parks..."
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-        />
         <View style={styles.filterRow}>
           <TextInput
-            style={styles.stateInput}
-            placeholder="Filter by state..."
-            value={stateFilter}
-            onChangeText={setStateFilter}
+            style={styles.searchInput}
+            placeholder="Search parks..."
+            value={searchQuery}
+            onChangeText={setSearchQuery}
           />
           <View style={styles.sortButtons}>
             <TouchableOpacity
@@ -136,11 +138,11 @@ export default function List({
             <TouchableOpacity
               style={[
                 styles.sortButton,
-                sortBy === "name" && styles.sortButtonActive,
+                sortBy === "visitors" && styles.sortButtonActive,
               ]}
-              onPress={() => setSortBy("name")}
+              onPress={() => setSortBy("visitors")}
             >
-              <Text>Name</Text>
+              <Text>Visitors</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[
@@ -149,23 +151,20 @@ export default function List({
               ]}
               onPress={() => setSortBy("visitors")}
             >
-              <Text>Visitors</Text>
+              <Text>Rating</Text>
             </TouchableOpacity>
           </View>
         </View>
       </View>
       <ScrollView style={styles.content}>
         {sortParks(filterParks(parks)).map((park) => (
-          <TouchableOpacity
+          <ListPark
             key={park.id}
-            onPress={() => setSelectedPark(park)}
-            style={styles.parkItem}
-          >
-            <Text>{park.name}</Text>
-            <Text style={styles.parkDetails}>
-              {park.state} • {park.yearly_visitors.toLocaleString()} visitors
-            </Text>
-          </TouchableOpacity>
+            park={park}
+            setSelectedPark={setSelectedPark}
+            user_list={user_list}
+            fetchListItems={fetchListItems}
+          />
         ))}
       </ScrollView>
     </Animated.View>
@@ -179,8 +178,8 @@ const styles = StyleSheet.create({
     zIndex: 1,
     backgroundColor: "white",
     width: "100%",
-    borderTopLeftRadius: 60,
-    borderTopRightRadius: 60,
+    borderTopLeftRadius: 25,
+    borderTopRightRadius: 25,
     overflow: "hidden",
   },
   handleContainer: {
@@ -215,19 +214,13 @@ const styles = StyleSheet.create({
     backgroundColor: "#f5f5f5",
     padding: 10,
     borderRadius: 8,
-    marginBottom: 10,
+    flex: 1,
+    marginRight: 10,
   },
   filterRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-  },
-  stateInput: {
-    backgroundColor: "#f5f5f5",
-    padding: 10,
-    borderRadius: 8,
-    flex: 1,
-    marginRight: 10,
   },
   sortButtons: {
     flexDirection: "row",

@@ -79,6 +79,8 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
         parks={parks}
         setSelectedPark={setSelectedPark}
         currentRegion={currentRegion}
+        user_list={listItems}
+        fetchListItems={fetchListItems}
       />
       <MapBG
         parks={parks}

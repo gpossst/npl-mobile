@@ -39,7 +39,7 @@ export default function MapBG({
                 latitude: lat,
                 longitude: lng,
               }}
-              pinColor="red"
+              pinColor="green"
               onPress={() => onMarkerSelected(park)}
             >
               <Callout tooltip>
