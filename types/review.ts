@@ -2,8 +2,9 @@ export type Review = {
   id: number;
   park_id: number;
   user_id: number;
+  author: string;
   rating: number;
-  comment: string;
-  public: boolean;
+  content: string;
+  is_public: boolean;
   created_at: string;
 };

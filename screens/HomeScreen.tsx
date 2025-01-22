@@ -9,6 +9,7 @@ import { Region } from "react-native-maps";
 import MapBG from "../components/MapBG";
 import SettingsBtn from "../components/SettingsBtn";
 import List from "../components/List";
+import ParkView from "../components/ParkView";
 
 export default function HomeScreen({ navigation }: { navigation: any }) {
   const [parks, setParks] = useState<NationalPark[]>([]);
@@ -75,13 +76,23 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
 
   return (
     <View style={styles.container}>
-      <List
-        parks={parks}
-        setSelectedPark={setSelectedPark}
-        currentRegion={currentRegion}
-        user_list={listItems}
-        fetchListItems={fetchListItems}
-      />
+      {selectedPark ? (
+        <ParkView
+          park={selectedPark}
+          reviews={reviews}
+          user_list={listItems}
+          setSelectedPark={setSelectedPark}
+          fetchListItems={fetchListItems}
+        />
+      ) : (
+        <List
+          parks={parks}
+          setSelectedPark={setSelectedPark}
+          currentRegion={currentRegion}
+          user_list={listItems}
+          fetchListItems={fetchListItems}
+        />
+      )}
       <MapBG
         parks={parks}
         onMarkerSelected={onMarkerSelected}

@@ -1,5 +1,5 @@
-import { StyleSheet, TouchableOpacity } from "react-native";
-import React, { useEffect, useState } from "react";
+import { StyleSheet, TouchableOpacity, Animated } from "react-native";
+import React, { useEffect, useState, useRef } from "react";
 import { NationalPark } from "../types/national_park";
 import { ListItem } from "../types/list_item";
 import Entypo from "@expo/vector-icons/Entypo";
@@ -17,26 +17,46 @@ export default function AddToListBtn({
   fetchListItems: () => void;
 }) {
   const [isInList, setIsInList] = useState(false);
+  const spinValue = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     setIsInList(user_list.some((item) => item.park_id === park.id));
   }, [user_list, park]);
 
+  useEffect(() => {
+    Animated.timing(spinValue, {
+      toValue: isInList ? 1 : 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  }, [isInList]);
+
+  const spin = spinValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: ["0deg", "180deg"],
+  });
+
   const handlePress = async () => {
-    if (isInList) {
-      await supabase
-        .from("list_items")
-        .delete()
-        .eq("park_id", park.id)
-        .eq("user_id", await getUserId());
-    } else {
-      await supabase.from("list_items").insert({
-        park_id: park.id,
-        user_id: await getUserId(),
-      });
+    setIsInList(!isInList);
+
+    try {
+      if (!isInList) {
+        await supabase.from("list_items").insert({
+          park_id: park.id,
+          user_id: await getUserId(),
+        });
+      } else {
+        await supabase
+          .from("list_items")
+          .delete()
+          .eq("park_id", park.id)
+          .eq("user_id", await getUserId());
+      }
+      fetchListItems();
+    } catch (error) {
+      setIsInList(!isInList);
+      console.error("Error updating list:", error);
     }
-    fetchListItems();
-    console.log(user_list);
   };
 
   return (
@@ -48,7 +68,9 @@ export default function AddToListBtn({
       }}
       onPress={handlePress}
     >
-      <Entypo name={isInList ? "minus" : "plus"} size={24} color="white" />
+      <Animated.View style={{ transform: [{ rotate: spin }] }}>
+        <Entypo name={isInList ? "minus" : "plus"} size={24} color="white" />
+      </Animated.View>
     </TouchableOpacity>
   );
 }

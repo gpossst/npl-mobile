@@ -33,3 +33,57 @@ export const getUserId = async () => {
   const { data, error } = await supabase.auth.getUser();
   return data?.user?.id;
 };
+
+export const addReview = async (
+  parkId: number,
+  rating: number,
+  content: string,
+  isPublic: boolean
+) => {
+  try {
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+    if (userError) {
+      console.error("User error:", userError);
+      return null;
+    }
+
+    const { data, error } = await supabase
+      .from("reviews")
+      .insert({
+        park_id: parkId,
+        author: userData.user?.user_metadata?.display_name,
+        rating,
+        content,
+        is_public: isPublic,
+        // user_id will be set by the trigger
+      })
+      .select();
+
+    if (error) {
+      console.error("Insert error:", error);
+      return null;
+    }
+    return data;
+  } catch (error) {
+    return null;
+  }
+};
+
+export const getReviews = async (
+  parkId: number,
+  page: number = 1,
+  pageSize: number = 10
+) => {
+  const start = (page - 1) * pageSize;
+  const end = start + pageSize - 1;
+
+  const { data, error } = await supabase
+    .from("reviews")
+    .select("*")
+    .eq("park_id", parkId)
+    .range(start, end)
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+  return data;
+};
