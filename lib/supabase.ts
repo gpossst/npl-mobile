@@ -77,16 +77,27 @@ export const getReviews = async (
 ) => {
   const start = (page - 1) * pageSize;
   const end = start + pageSize - 1;
-
   const { data, error } = await supabase
     .from("reviews")
     .select("*")
     .eq("park_id", parkId)
+    .eq("is_public", true)
+    .range(start, end)
+    .order("created_at", { ascending: false });
+
+  const { data: privateData, error: privateError } = await supabase
+    .from("reviews")
+    .select("*")
+    .eq("park_id", parkId)
+    .eq("is_public", false)
+    .eq("user_id", await getUserId())
     .range(start, end)
     .order("created_at", { ascending: false });
 
   if (error) throw error;
-  return data;
+  if (privateError) throw privateError;
+
+  return [...(data || []), ...(privateData || [])];
 };
 
 export const getReviewStats = async () => {

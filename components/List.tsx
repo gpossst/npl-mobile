@@ -9,11 +9,12 @@ import {
   TextInput,
   ScrollView,
 } from "react-native";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { NationalPark } from "../types/national_park";
 import { Region } from "react-native-maps";
 import ListPark from "./ListPark";
 import { ListItem } from "../types/list_item";
+import PersonalListBtn from "./PersonalListBtn";
 
 type SortOption = "distance" | "name" | "visitors" | "review_average";
 
@@ -35,6 +36,8 @@ export default function List({
   const windowHeight = Dimensions.get("window").height;
   const defaultHeight = windowHeight * 0.5; // Changed to middle position
   const [containerHeight, setContainerHeight] = useState(defaultHeight);
+  const [inPersonalList, setInPersonalList] = useState<NationalPark[]>([]);
+  const [isPersonalList, setIsPersonalList] = useState(false);
   const minHeight = windowHeight * 0.2;
   const maxHeight = windowHeight * 0.8; // Changed to 0.8 instead of 0.93
 
@@ -126,6 +129,15 @@ export default function List({
     });
   };
 
+  useEffect(() => {
+    if (isPersonalList && parks) {
+      const userParks = user_list
+        .map((listItem) => parks.find((park) => park.id === listItem.park_id))
+        .filter((park): park is NationalPark => park !== undefined);
+      setInPersonalList(userParks);
+    }
+  }, [isPersonalList, user_list, parks]);
+
   return (
     <Animated.View
       style={[
@@ -178,16 +190,22 @@ export default function List({
         </View>
       </View>
       <ScrollView style={styles.content}>
-        {sortParks(filterParks(parks)).map((park) => (
-          <ListPark
-            key={park.id}
-            park={park}
-            setSelectedPark={setSelectedPark}
-            user_list={user_list}
-            fetchListItems={fetchListItems}
-          />
-        ))}
+        {sortParks(filterParks(isPersonalList ? inPersonalList : parks)).map(
+          (park) => (
+            <ListPark
+              key={park.id}
+              park={park}
+              setSelectedPark={setSelectedPark}
+              user_list={user_list}
+              fetchListItems={fetchListItems}
+            />
+          )
+        )}
       </ScrollView>
+      <PersonalListBtn
+        onToggle={() => setIsPersonalList(!isPersonalList)}
+        isEnabled={isPersonalList}
+      />
     </Animated.View>
   );
 }
