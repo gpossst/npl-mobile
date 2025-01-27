@@ -12,7 +12,9 @@ export default function ReviewItem({ review }: { review: Review }) {
     <View style={styles.reviewContainer}>
       <View style={styles.ratingContainer}>
         <View style={styles.reviewerContainer}>
-          <Text style={styles.reviewerName}>{review.author}</Text>
+          <Text style={styles.reviewerName}>
+            {review.author || "Anonymous"}
+          </Text>
           <Text style={styles.reviewDate}>
             {new Date(review.created_at).toLocaleDateString()}
           </Text>

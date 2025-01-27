@@ -1,7 +1,6 @@
 import { View, Text, StyleSheet } from "react-native";
 import React, { useState, useEffect } from "react";
-import { Button } from "@rneui/themed";
-import { supabase, getUserId } from "../lib/supabase";
+import { supabase, getUserId, getParkData } from "../lib/supabase";
 import { NationalPark } from "../types/national_park";
 import { Review } from "../types/review";
 import { ListItem } from "../types/list_item";
@@ -25,12 +24,8 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
   });
 
   const fetchMarkers = async () => {
-    const { data, error } = await supabase.from("national_parks").select("*");
-    if (error) {
-      console.error("Supabase error:", error);
-    } else {
-      setParks(data as NationalPark[]);
-    }
+    const data = await getParkData();
+    setParks(data);
   };
 
   const fetchReviews = async () => {

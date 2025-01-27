@@ -5,6 +5,8 @@ import AntDesign from "@expo/vector-icons/AntDesign";
 import { getReviews } from "../lib/supabase";
 import { Review } from "../types/review";
 import ReviewItem from "./ReviewItem";
+import { getReviewStats } from "../lib/supabase";
+
 interface ParkInfoProps {
   park: NationalPark;
 }
@@ -13,6 +15,10 @@ export default function ParkInfo({ park }: ParkInfoProps) {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [reviewStats, setReviewStats] = useState({
+    average: 0,
+    count: 0,
+  });
 
   useEffect(() => {
     loadReviews();
@@ -29,22 +35,6 @@ export default function ParkInfo({ park }: ParkInfoProps) {
       setLoading(false);
     }
   };
-
-  const renderReview = ({ item }: { item: Review }) => (
-    <View style={styles.reviewItem}>
-      <View style={styles.reviewHeader}>
-        <Text style={styles.reviewAuthor}>{item.author}</Text>
-        <View style={styles.ratingContainer}>
-          <AntDesign name="star" size={16} color="green" />
-          <Text style={styles.reviewRating}>{item.rating}</Text>
-        </View>
-      </View>
-      <Text style={styles.reviewText}>{item.content}</Text>
-      <Text style={styles.reviewDate}>
-        {new Date(item.created_at).toLocaleDateString()}
-      </Text>
-    </View>
-  );
 
   return (
     <View style={styles.infoContainer}>

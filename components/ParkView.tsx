@@ -33,6 +33,7 @@ export default function ParkView({
   const windowHeight = Dimensions.get("window").height;
   const defaultHeight = windowHeight * 0.8;
   const [containerHeight, setContainerHeight] = useState(defaultHeight);
+
   const minHeight = windowHeight * 0.2;
   const maxHeight = windowHeight * 0.8;
   const blurhash =

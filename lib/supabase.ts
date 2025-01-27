@@ -2,6 +2,7 @@ import { AppState } from "react-native";
 import "react-native-url-polyfill/auto";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createClient } from "@supabase/supabase-js";
+import { NationalPark } from "../types/national_park";
 
 const supabaseUrl = "https://jsdhqwsotkisigofwxht.supabase.co";
 const supabaseAnonKey =
@@ -47,7 +48,8 @@ export const addReview = async (
       return null;
     }
 
-    const { data, error } = await supabase
+    // Start a Supabase transaction
+    const { data: reviewData, error: reviewError } = await supabase
       .from("reviews")
       .insert({
         park_id: parkId,
@@ -55,16 +57,15 @@ export const addReview = async (
         rating,
         content,
         is_public: isPublic,
-        // user_id will be set by the trigger
       })
       .select();
 
-    if (error) {
-      console.error("Insert error:", error);
+    if (reviewError) {
+      console.error("Insert error:", reviewError);
       return null;
     }
-    return data;
   } catch (error) {
+    console.error("Error in addReview:", error);
     return null;
   }
 };
@@ -86,4 +87,72 @@ export const getReviews = async (
 
   if (error) throw error;
   return data;
+};
+
+export const getReviewStats = async () => {
+  const { data, error } = await supabase.rpc("get_review_stats");
+
+  if (error) {
+    console.error("Error getting review stats:", error);
+    return {
+      count: 0,
+      average: 0,
+    };
+  }
+
+  console.log("Review stats:", data);
+
+  return {
+    count: data[0].rating_count || 0,
+    average: data[0].average_rating || 0,
+  };
+};
+
+interface ReviewStats {
+  park_id: number;
+  average_rating: number;
+  rating_count: number;
+}
+
+export const getParkData = async () => {
+  let parkData: NationalPark[] = [];
+  try {
+    // Get both park data and review stats concurrently
+    const [
+      { data: parks, error: parksError },
+      { data: stats, error: statsError },
+    ] = await Promise.all([
+      supabase.from("national_parks").select("*"),
+      supabase.rpc("get_review_stats"),
+    ]);
+
+    if (parksError) throw parksError;
+    if (statsError) throw statsError;
+
+    // Create a map of park_id to review stats for easier lookup
+    const reviewStatsMap = new Map(
+      stats.map((stat: ReviewStats) => [
+        stat.park_id,
+        {
+          average_rating: stat.average_rating,
+          rating_count: stat.rating_count,
+        },
+      ])
+    );
+
+    // Merge park data with review stats
+    parkData = parks.map((park) => ({
+      ...park,
+      // @ts-ignore
+      review_average: reviewStatsMap.get(park.id)?.average_rating || 0,
+      // @ts-ignore
+      review_count: reviewStatsMap.get(park.id)?.rating_count || 0,
+    }));
+
+    console.log("Park data:", parkData);
+    return parkData as NationalPark[];
+  } catch (error) {
+    console.error("Error getting park data:", error);
+    return [];
+  }
 };
