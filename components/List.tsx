@@ -180,9 +180,9 @@ export default function List({
             <TouchableOpacity
               style={[
                 styles.sortButton,
-                sortBy === "visitors" && styles.sortButtonActive,
+                sortBy === "review_average" && styles.sortButtonActive,
               ]}
-              onPress={() => setSortBy("visitors")}
+              onPress={() => setSortBy("review_average")}
             >
               <Text>Rating</Text>
             </TouchableOpacity>

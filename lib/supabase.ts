@@ -3,6 +3,7 @@ import "react-native-url-polyfill/auto";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createClient } from "@supabase/supabase-js";
 import { NationalPark } from "../types/national_park";
+import { UserStats } from "../types/user_stats";
 
 const supabaseUrl = "https://jsdhqwsotkisigofwxht.supabase.co";
 const supabaseAnonKey =
@@ -111,8 +112,6 @@ export const getReviewStats = async () => {
     };
   }
 
-  console.log("Review stats:", data);
-
   return {
     count: data[0].rating_count || 0,
     average: data[0].average_rating || 0,
@@ -128,7 +127,6 @@ interface ReviewStats {
 export const getParkData = async () => {
   let parkData: NationalPark[] = [];
   try {
-    // Get both park data and review stats concurrently
     const [
       { data: parks, error: parksError },
       { data: stats, error: statsError },
@@ -140,7 +138,6 @@ export const getParkData = async () => {
     if (parksError) throw parksError;
     if (statsError) throw statsError;
 
-    // Create a map of park_id to review stats for easier lookup
     const reviewStatsMap = new Map(
       stats.map((stat: ReviewStats) => [
         stat.park_id,
@@ -160,10 +157,62 @@ export const getParkData = async () => {
       review_count: reviewStatsMap.get(park.id)?.rating_count || 0,
     }));
 
-    console.log("Park data:", parkData);
     return parkData as NationalPark[];
   } catch (error) {
     console.error("Error getting park data:", error);
     return [];
   }
+};
+
+export const getUserStats = async ({ userId }: { userId: string }) => {
+  const { data: reviewData, error: reviewError } = await supabase
+    .from("reviews")
+    .select("*")
+    .eq("user_id", userId);
+  const { data: listData, error: listError } = await supabase
+    .from("list_items")
+    .select("*")
+    .eq("user_id", userId);
+
+  if (reviewError) throw reviewError;
+  if (listError) throw listError;
+
+  return {
+    review_count: reviewData.length,
+    list_count: listData.length,
+  } as UserStats;
+};
+
+export const updateDisplayName = async (displayName: string) => {
+  const { data: userData, error: userError } = await supabase.auth.getUser();
+  const { error } = await supabase.auth.updateUser({
+    data: {
+      ...userData.user?.user_metadata,
+      display_name: displayName,
+    },
+  });
+
+  await supabase
+    .from("reviews")
+    .update({
+      author: displayName,
+    })
+    .eq("user_id", userData.user?.id);
+
+  if (error) throw error;
+};
+
+export const updateEmail = async (email: string) => {
+  const { error } = await supabase.auth.updateUser({ email });
+  if (error) throw error;
+};
+
+export const updatePassword = async (email: string) => {
+  const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: "https://example.com/update-password",
+  });
+
+  if (error) throw error;
+
+  return data;
 };

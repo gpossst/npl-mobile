@@ -8,6 +8,8 @@ import { NavigationContainer } from "@react-navigation/native";
 import { supabase } from "./lib/supabase";
 import { Session } from "@supabase/supabase-js";
 import HomeScreen from "./screens/HomeScreen";
+import { Image as ExpoImage } from "expo-image";
+import ForgotPasswordScreen from "./screens/ForgotPasswordScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -16,6 +18,7 @@ function AuthStack() {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="SignIn" component={SignInScreen} />
       <Stack.Screen name="SignUp" component={SignUpScreen} />
+      <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
     </Stack.Navigator>
   );
 }
@@ -28,7 +31,13 @@ function MainStack() {
         component={HomeScreen}
         options={{ headerShown: false }}
       />
-      <Stack.Screen name="Settings" component={SettingsScreen} />
+      <Stack.Screen
+        name="Settings"
+        component={SettingsScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
     </Stack.Navigator>
   );
 }
@@ -44,6 +53,9 @@ export default function App() {
     supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
     });
+
+    // Preload the background image
+    ExpoImage.prefetch(require("./assets/valley-landscape.jpg"));
   }, []);
 
   return (
