@@ -50,28 +50,30 @@ export default function ForgotPasswordScreen({
             <Text style={styles.backButtonText}>← Back</Text>
           </TouchableOpacity>
         </View>
-        <View style={styles.formContainer}>
-          <Text style={styles.title}>Reset Password</Text>
-          <Text style={styles.subtitle}>
-            Enter your email address and we'll send you a link to reset your
-            password.
-          </Text>
-          <View style={styles.inputContainer}>
-            <TextInput
-              style={styles.input}
-              placeholder="Email"
-              onChangeText={(text) => setEmail(text)}
-              value={email}
-              autoCapitalize="none"
-            />
+        <View style={styles.centerContainer}>
+          <View style={styles.formContainer}>
+            <Text style={styles.title}>Reset Password</Text>
+            <Text style={styles.subtitle}>
+              Enter your email address and we'll send you a link to reset your
+              password.
+            </Text>
+            <View style={styles.inputContainer}>
+              <TextInput
+                style={styles.input}
+                placeholder="Email"
+                onChangeText={(text) => setEmail(text)}
+                value={email}
+                autoCapitalize="none"
+              />
+            </View>
+            <TouchableOpacity
+              style={[styles.button, loading && styles.buttonDisabled]}
+              disabled={loading}
+              onPress={handleResetPassword}
+            >
+              <Text style={styles.buttonText}>Send Reset Link</Text>
+            </TouchableOpacity>
           </View>
-          <TouchableOpacity
-            style={[styles.button, loading && styles.buttonDisabled]}
-            disabled={loading}
-            onPress={handleResetPassword}
-          >
-            <Text style={styles.buttonText}>Send Reset Link</Text>
-          </TouchableOpacity>
         </View>
       </View>
     </View>
@@ -112,9 +114,14 @@ const styles = StyleSheet.create({
     color: "green",
     fontWeight: "bold",
   },
+  centerContainer: {
+    flex: 1,
+    justifyContent: "center",
+    paddingBottom: 100, // Offset slightly to account for the back button
+  },
   formContainer: {
     padding: 20,
-    marginTop: 120,
+    // Remove marginTop since we're using centerContainer
   },
   title: {
     fontSize: 24,

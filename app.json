@@ -13,16 +13,24 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.garrettp.nplnew"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.garrettp.nplnew"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "scheme": "adventure",
+    "extra": {
+      "eas": {
+        "projectId": "19884765-6fa9-4822-92a5-94f3d0a9eae1"
+      }
     }
   }
 }

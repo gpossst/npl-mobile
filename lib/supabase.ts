@@ -209,7 +209,7 @@ export const updateEmail = async (email: string) => {
 
 export const updatePassword = async (email: string) => {
   const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: "https://example.com/update-password",
+    redirectTo: "adventure://reset-password",
   });
 
   if (error) throw error;
