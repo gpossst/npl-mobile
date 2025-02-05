@@ -8,7 +8,7 @@
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/aa-dark.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -17,14 +17,7 @@
       "bundleIdentifier": "com.garrettp.nplnew"
     },
     "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      },
       "package": "com.garrettp.nplnew"
-    },
-    "web": {
-      "favicon": "./assets/favicon.png"
     },
     "scheme": "adventure",
     "extra": {

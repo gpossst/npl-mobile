@@ -1,20 +1,23 @@
-import {
-  StyleSheet,
-  Text,
-  ImageBackground,
-  Dimensions,
-  Linking,
-} from "react-native";
+import { StyleSheet, Text, Linking, View } from "react-native";
 import { Image } from "expo-image";
 import React from "react";
 
 const Loading = () => {
   return (
-    <ImageBackground
-      source={require("../assets/horseshoe-bend.jpg")}
-      style={styles.container}
-    >
-      <Image source={require("../assets/aa-light.png")} style={styles.image} />
+    <View style={styles.container}>
+      <Image
+        source={require("../assets/horseshoe-bend.jpg")}
+        style={styles.backgroundImage}
+        contentFit="cover"
+        cachePolicy="memory-disk"
+      />
+      <Image
+        source={require("../assets/aa-light.png")}
+        style={styles.image}
+        cachePolicy="memory-disk"
+        contentFit="contain"
+        priority="high"
+      />
       <Text style={styles.attribution}>
         Photo by{" "}
         <Text
@@ -39,7 +42,7 @@ const Loading = () => {
           Unsplash
         </Text>
       </Text>
-    </ImageBackground>
+    </View>
   );
 };
 
@@ -51,10 +54,14 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  backgroundImage: {
+    ...StyleSheet.absoluteFillObject,
+  },
   image: {
     width: 100,
     height: 100,
     alignSelf: "center",
+    zIndex: 1,
   },
   attribution: {
     position: "absolute",
@@ -63,6 +70,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: "#666",
     fontSize: 12,
+    zIndex: 1,
   },
   link: {
     color: "green",
