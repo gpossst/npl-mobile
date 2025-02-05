@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet } from "react-native";
+import { View, StyleSheet } from "react-native";
 import React, { useState, useEffect } from "react";
 import { supabase, getUserId, getParkData } from "../lib/supabase";
 import { NationalPark } from "../types/national_park";
@@ -9,7 +9,7 @@ import MapBG from "../components/MapBG";
 import SettingsBtn from "../components/SettingsBtn";
 import List from "../components/List";
 import ParkView from "../components/ParkView";
-
+import Loading from "../components/Loading";
 export default function HomeScreen({ navigation }: { navigation: any }) {
   const [parks, setParks] = useState<NationalPark[]>([]);
   const [selectedPark, setSelectedPark] = useState<NationalPark | null>(null);
@@ -66,7 +66,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
   };
 
   if (parks.length === 0 || loading) {
-    return <Text>Loading...</Text>;
+    return <Loading />;
   }
 
   return (
